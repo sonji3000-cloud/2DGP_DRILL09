@@ -7,6 +7,14 @@ import pico2d as p2d
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 1024
 RESOURCE_DIR = Path(__file__).resolve().parent
+FRAME_WIDTH = 100
+FRAME_HEIGHT = 100
+FRAME_COUNT = 8
+IDLE_RIGHT_ROW = 300
+
+
+def draw_character(sheet, x, y):
+    sheet.clip_draw(0, IDLE_RIGHT_ROW, FRAME_WIDTH, FRAME_HEIGHT, x, y)
 
 
 def handle_events():
@@ -21,16 +29,20 @@ def handle_events():
 def main():
     p2d.open_canvas(WINDOW_WIDTH, WINDOW_HEIGHT)
     background = None
+    sheet = None
     try:
         p2d.hide_lattice()
         background = p2d.load_image(str(RESOURCE_DIR / "TUK_GROUND.png"))
+        sheet = p2d.load_image(str(RESOURCE_DIR / "animation_sheet.png"))
         while handle_events():
             p2d.clear_canvas()
             background.draw(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+            draw_character(sheet, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
             p2d.update_canvas()
             p2d.delay(0.01)
     finally:
         background = None
+        sheet = None
         p2d.close_canvas()
 
 
