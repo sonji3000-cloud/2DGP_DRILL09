@@ -15,6 +15,9 @@ FRAME_HEIGHT = 100
 FRAME_COUNT = 8
 IDLE_RIGHT_ROW = 300
 IDLE_LEFT_ROW = 200
+MOVE_RIGHT_ROW = 100
+MOVE_LEFT_ROW = 0
+ANIMATION_FPS = 10.0
 MOVE_SPEED = 200.0
 MOVEMENT_KEYS = {p2d.SDLK_LEFT, p2d.SDLK_RIGHT, p2d.SDLK_UP, p2d.SDLK_DOWN}
 
@@ -24,9 +27,13 @@ class Character:
     x: float = WINDOW_WIDTH / 2
     y: float = WINDOW_HEIGHT / 2
     facing: str = "RIGHT"
+    state: str = "IDLE"
+    frame: int = 0
+    animation_time: float = 0.0
 
 
 def update_character(character, pressed_keys, dt):
+    previous_animation = (character.state, character.facing)
     dx = int(p2d.SDLK_RIGHT in pressed_keys) - int(p2d.SDLK_LEFT in pressed_keys)
     dy = int(p2d.SDLK_UP in pressed_keys) - int(p2d.SDLK_DOWN in pressed_keys)
     length = hypot(dx, dy)
@@ -35,11 +42,32 @@ def update_character(character, pressed_keys, dt):
     if length:
         character.x += dx / length * MOVE_SPEED * dt
         character.y += dy / length * MOVE_SPEED * dt
+    character.state = "MOVE" if length else "IDLE"
+    update_animation(character, previous_animation, dt)
+
+
+def update_animation(character, previous_animation, dt):
+    if previous_animation != (character.state, character.facing):
+        character.frame = 0
+        character.animation_time = 0.0
+        return
+    if character.state == "IDLE":
+        return
+    character.animation_time += dt
+    steps = int((character.animation_time + 1e-9) * ANIMATION_FPS)
+    character.animation_time = max(0.0, character.animation_time - steps / ANIMATION_FPS)
+    character.frame = (character.frame + steps) % FRAME_COUNT
 
 
 def draw_character(sheet, character):
-    row = IDLE_RIGHT_ROW if character.facing == "RIGHT" else IDLE_LEFT_ROW
-    sheet.clip_draw(0, row, FRAME_WIDTH, FRAME_HEIGHT, character.x, character.y)
+    if character.state == "MOVE":
+        row = MOVE_RIGHT_ROW if character.facing == "RIGHT" else MOVE_LEFT_ROW
+    else:
+        row = IDLE_RIGHT_ROW if character.facing == "RIGHT" else IDLE_LEFT_ROW
+    sheet.clip_draw(
+        character.frame * FRAME_WIDTH, row, FRAME_WIDTH, FRAME_HEIGHT,
+        character.x, character.y,
+    )
 
 
 def handle_events(pressed_keys):
