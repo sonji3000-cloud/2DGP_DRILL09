@@ -14,6 +14,7 @@ FRAME_WIDTH = 100
 FRAME_HEIGHT = 100
 FRAME_COUNT = 8
 IDLE_RIGHT_ROW = 300
+IDLE_LEFT_ROW = 200
 MOVE_SPEED = 200.0
 MOVEMENT_KEYS = {p2d.SDLK_LEFT, p2d.SDLK_RIGHT, p2d.SDLK_UP, p2d.SDLK_DOWN}
 
@@ -22,19 +23,23 @@ MOVEMENT_KEYS = {p2d.SDLK_LEFT, p2d.SDLK_RIGHT, p2d.SDLK_UP, p2d.SDLK_DOWN}
 class Character:
     x: float = WINDOW_WIDTH / 2
     y: float = WINDOW_HEIGHT / 2
+    facing: str = "RIGHT"
 
 
 def update_character(character, pressed_keys, dt):
     dx = int(p2d.SDLK_RIGHT in pressed_keys) - int(p2d.SDLK_LEFT in pressed_keys)
     dy = int(p2d.SDLK_UP in pressed_keys) - int(p2d.SDLK_DOWN in pressed_keys)
     length = hypot(dx, dy)
+    if dx:
+        character.facing = "RIGHT" if dx > 0 else "LEFT"
     if length:
         character.x += dx / length * MOVE_SPEED * dt
         character.y += dy / length * MOVE_SPEED * dt
 
 
-def draw_character(sheet, x, y):
-    sheet.clip_draw(0, IDLE_RIGHT_ROW, FRAME_WIDTH, FRAME_HEIGHT, x, y)
+def draw_character(sheet, character):
+    row = IDLE_RIGHT_ROW if character.facing == "RIGHT" else IDLE_LEFT_ROW
+    sheet.clip_draw(0, row, FRAME_WIDTH, FRAME_HEIGHT, character.x, character.y)
 
 
 def handle_events(pressed_keys):
@@ -68,7 +73,7 @@ def main():
             update_character(character, pressed_keys, dt)
             p2d.clear_canvas()
             background.draw(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-            draw_character(sheet, character.x, character.y)
+            draw_character(sheet, character)
             p2d.update_canvas()
             p2d.delay(0.01)
     finally:
