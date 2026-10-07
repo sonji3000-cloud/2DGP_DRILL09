@@ -1,6 +1,7 @@
 """Pico2D로 실행하는 TUK 캐릭터 이동 프로그램."""
 
 from dataclasses import dataclass
+from math import hypot
 from pathlib import Path
 from time import perf_counter
 
@@ -14,7 +15,7 @@ FRAME_HEIGHT = 100
 FRAME_COUNT = 8
 IDLE_RIGHT_ROW = 300
 MOVE_SPEED = 200.0
-MOVEMENT_KEYS = {p2d.SDLK_LEFT, p2d.SDLK_RIGHT}
+MOVEMENT_KEYS = {p2d.SDLK_LEFT, p2d.SDLK_RIGHT, p2d.SDLK_UP, p2d.SDLK_DOWN}
 
 
 @dataclass
@@ -25,7 +26,11 @@ class Character:
 
 def update_character(character, pressed_keys, dt):
     dx = int(p2d.SDLK_RIGHT in pressed_keys) - int(p2d.SDLK_LEFT in pressed_keys)
-    character.x += dx * MOVE_SPEED * dt
+    dy = int(p2d.SDLK_UP in pressed_keys) - int(p2d.SDLK_DOWN in pressed_keys)
+    length = hypot(dx, dy)
+    if length:
+        character.x += dx / length * MOVE_SPEED * dt
+        character.y += dy / length * MOVE_SPEED * dt
 
 
 def draw_character(sheet, x, y):
