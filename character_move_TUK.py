@@ -34,6 +34,7 @@ class Character:
 
 def update_character(character, pressed_keys, dt):
     previous_animation = (character.state, character.facing)
+    previous_position = (character.x, character.y)
     dx = int(p2d.SDLK_RIGHT in pressed_keys) - int(p2d.SDLK_LEFT in pressed_keys)
     dy = int(p2d.SDLK_UP in pressed_keys) - int(p2d.SDLK_DOWN in pressed_keys)
     length = hypot(dx, dy)
@@ -42,7 +43,10 @@ def update_character(character, pressed_keys, dt):
     if length:
         character.x += dx / length * MOVE_SPEED * dt
         character.y += dy / length * MOVE_SPEED * dt
-    character.state = "MOVE" if length else "IDLE"
+    # 표시 영역 전체를 화면 안에 유지하며 두 축을 독립적으로 제한한다.
+    character.x = max(FRAME_WIDTH / 2, min(character.x, WINDOW_WIDTH - FRAME_WIDTH / 2))
+    character.y = max(FRAME_HEIGHT / 2, min(character.y, WINDOW_HEIGHT - FRAME_HEIGHT / 2))
+    character.state = "MOVE" if previous_position != (character.x, character.y) else "IDLE"
     update_animation(character, previous_animation, dt)
 
 
