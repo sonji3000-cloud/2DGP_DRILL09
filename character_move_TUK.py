@@ -51,8 +51,6 @@ def update_animation(character, previous_animation, dt):
         character.frame = 0
         character.animation_time = 0.0
         return
-    if character.state == "IDLE":
-        return
     character.animation_time += dt
     steps = int((character.animation_time + 1e-9) * ANIMATION_FPS)
     character.animation_time = max(0.0, character.animation_time - steps / ANIMATION_FPS)
